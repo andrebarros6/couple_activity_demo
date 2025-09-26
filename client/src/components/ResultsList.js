@@ -151,6 +151,25 @@ const ResultsList = ({ results, isLoading, error, searchCriteria }) => {
           </p>
         </div>
 
+        {/* Warning message for fallback mode */}
+        {searchCriteria?.warning && (
+          <div style={{
+            background: 'rgba(255, 165, 0, 0.9)',
+            color: 'white',
+            padding: '1rem',
+            borderRadius: '12px',
+            marginBottom: '2rem',
+            textAlign: 'center',
+            border: '2px solid rgba(255, 165, 0, 0.3)',
+            backdropFilter: 'blur(10px)'
+          }}>
+            <div style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>⚠️</div>
+            <p style={{ margin: 0, fontSize: '1rem', fontWeight: '500' }}>
+              {searchCriteria.warning}
+            </p>
+          </div>
+        )}
+
         <div>
           {results.map((activity, index) => (
             <ActivityCard

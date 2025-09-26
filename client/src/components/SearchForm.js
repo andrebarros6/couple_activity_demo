@@ -1,40 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import { getCategories, getCities } from '../services/api';
+import React, { useState } from 'react';
 
 const SearchForm = ({ onSearch, isLoading }) => {
-  // Form state
+  // Form state - simplified to just text inputs
   const [formData, setFormData] = useState({
     city: '',
-    availability: 'all day',
-    distance: 25,
-    preferences: [],
+    availability: '',
     additionalPreferences: ''
   });
-
-  // Options from API
-  const [cities, setCities] = useState([]);
-  const [categories, setCategories] = useState([]);
-  const [loadingOptions, setLoadingOptions] = useState(true);
-
-  // Load cities and categories on component mount
-  useEffect(() => {
-    const loadOptions = async () => {
-      try {
-        const [citiesResponse, categoriesResponse] = await Promise.all([
-          getCities(),
-          getCategories()
-        ]);
-        setCities(citiesResponse.cities || []);
-        setCategories(categoriesResponse.categories || []);
-      } catch (error) {
-        console.error('Failed to load form options:', error);
-      } finally {
-        setLoadingOptions(false);
-      }
-    };
-
-    loadOptions();
-  }, []);
 
   // Handle input changes
   const handleInputChange = (e) => {
@@ -45,21 +17,15 @@ const SearchForm = ({ onSearch, isLoading }) => {
     }));
   };
 
-  // Handle preference checkbox changes
-  const handlePreferenceChange = (category) => {
-    setFormData(prev => ({
-      ...prev,
-      preferences: prev.preferences.includes(category)
-        ? prev.preferences.filter(p => p !== category)
-        : [...prev.preferences, category]
-    }));
-  };
-
   // Handle form submission
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!formData.city.trim()) {
-      alert('Please select a city');
+      alert('Please enter a city');
+      return;
+    }
+    if (!formData.availability.trim()) {
+      alert('Please enter when you\'re available');
       return;
     }
     onSearch(formData);
@@ -99,16 +65,6 @@ const SearchForm = ({ onSearch, isLoading }) => {
     width: '100%'
   };
 
-  if (loadingOptions) {
-    return (
-      <div style={formStyle}>
-        <div style={{ textAlign: 'center', padding: '2rem' }}>
-          <div style={{ fontSize: '18px', color: '#667eea' }}>Loading form options...</div>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <form onSubmit={handleSubmit} style={formStyle}>
       <h2 style={{
@@ -121,121 +77,51 @@ const SearchForm = ({ onSearch, isLoading }) => {
         Find Your Perfect Date 💕
       </h2>
 
-      {/* City Selection */}
+      {/* City Input */}
       <div style={{ marginBottom: '1.5rem' }}>
         <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', color: '#2d3748' }}>
           📍 City
         </label>
-        <select
+        <input
+          type="text"
           name="city"
           value={formData.city}
           onChange={handleInputChange}
+          placeholder="Enter a city (e.g., Paris, New York, Barcelona...)"
           style={inputStyle}
           required
-        >
-          <option value="">Select a city...</option>
-          {cities.map(city => (
-            <option key={city} value={city}>{city}</option>
-          ))}
-        </select>
+        />
       </div>
 
-      {/* Availability */}
+      {/* Availability Input */}
       <div style={{ marginBottom: '1.5rem' }}>
         <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', color: '#2d3748' }}>
-          ⏰ When are you free?
+          ⏰ When are you available?
         </label>
-        <select
+        <input
+          type="text"
           name="availability"
           value={formData.availability}
           onChange={handleInputChange}
+          placeholder="Enter when you're free (e.g., Saturday evening, weekday afternoon, this weekend...)"
           style={inputStyle}
-        >
-          <option value="all day">Anytime</option>
-          <option value="morning">Morning</option>
-          <option value="afternoon">Afternoon</option>
-          <option value="evening">Evening</option>
-        </select>
-      </div>
-
-      {/* Distance */}
-      <div style={{ marginBottom: '1.5rem' }}>
-        <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', color: '#2d3748' }}>
-          🚗 Maximum distance: {formData.distance} km
-        </label>
-        <input
-          type="range"
-          name="distance"
-          min="1"
-          max="50"
-          value={formData.distance}
-          onChange={handleInputChange}
-          style={{
-            width: '100%',
-            height: '8px',
-            borderRadius: '5px',
-            background: '#e2e8f0',
-            outline: 'none'
-          }}
+          required
         />
-        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: '#718096', marginTop: '4px' }}>
-          <span>1 km</span>
-          <span>50 km</span>
-        </div>
-      </div>
-
-      {/* Preferences */}
-      <div style={{ marginBottom: '1.5rem' }}>
-        <label style={{ display: 'block', marginBottom: '12px', fontWeight: '600', color: '#2d3748' }}>
-          ❤️ What kind of activities do you enjoy?
-        </label>
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-          gap: '12px'
-        }}>
-          {categories.map(category => (
-            <label
-              key={category}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                padding: '12px',
-                background: formData.preferences.includes(category) ? '#667eea' : 'white',
-                color: formData.preferences.includes(category) ? 'white' : '#2d3748',
-                borderRadius: '8px',
-                border: '2px solid #e2e8f0',
-                cursor: 'pointer',
-                transition: 'all 0.3s ease',
-                fontSize: '14px',
-                fontWeight: '500'
-              }}
-            >
-              <input
-                type="checkbox"
-                checked={formData.preferences.includes(category)}
-                onChange={() => handlePreferenceChange(category)}
-                style={{ marginRight: '8px' }}
-              />
-              {category.charAt(0).toUpperCase() + category.slice(1)}
-            </label>
-          ))}
-        </div>
       </div>
 
       {/* Additional Preferences */}
       <div style={{ marginBottom: '2rem' }}>
         <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', color: '#2d3748' }}>
-          💭 Anything else? (Optional)
+          💭 What are you looking for? (Optional)
         </label>
         <textarea
           name="additionalPreferences"
           value={formData.additionalPreferences}
           onChange={handleInputChange}
-          placeholder="Tell us more about what you're looking for..."
+          placeholder="Tell us what you enjoy... (e.g., romantic dinner, outdoor activities, cultural experiences, live music, wine tasting...)"
           style={{
             ...inputStyle,
-            height: '80px',
+            height: '100px',
             resize: 'vertical'
           }}
         />

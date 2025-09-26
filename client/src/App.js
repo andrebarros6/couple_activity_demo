@@ -39,6 +39,13 @@ function App() {
       if (response.success && response.results) {
         setSearchResults(response.results);
 
+        // Update search criteria with warning if present
+        setSearchCriteria({
+          ...criteria,
+          warning: response.warning,
+          source: response.source
+        });
+
         // Scroll to results
         setTimeout(() => {
           const resultsElement = document.getElementById('results-section');
